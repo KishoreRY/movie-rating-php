@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="css/s1.css">
+<title>Movie Rating</title>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.js"></script>
+ <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+ 
+	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+	<link href="http://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
+<script type="text/javascript">
+
+</head>
+<body>
+      
+<?php
+require_once 'sessionCheck.php';
+require_once 'init.php';
+
+$movie = null;
+
+if(isset($_GET['id'])) 
+{
+    $id = (int)$_GET['id'];
+
+    $movie = $con->query
+    ("
+        SELECT movies.id, movies.movie_name, AVG(user_movie_ratings.rating) AS rating
+        FROM movies
+        LEFT JOIN user_movie_ratings
+        ON movies.id = user_movie_ratings.movie_id
+        WHERE movies.id = {$id}
+    ")->fetch_object();
+
+}
+
+?>
+<?php
+
+require_once 'init.php';
+
+if(isset($_GET['movie'], $_GET['rating'])) {
+
+$movie = (int)$_GET['movie'];
+$rating = (int)$_GET['rating'];
+
+if(in_array($rating, array(1, 2, 3, 4, 5))) {
+
+$exists = $con->query("SELECT id FROM movies WHERE id = {$movie}")->num_rows ? true : false;
+
+if ($exists) {
+$con->query("INSERT INTO user_movie_ratings (movie_id, rating) VALUES ({$movie}, {$rating} )");
+}
+}
+header('Location: movie.php?id=' . $movie);
+}
+  ?>
+</body>
+</html>
